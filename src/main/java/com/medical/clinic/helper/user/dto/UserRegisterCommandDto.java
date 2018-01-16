@@ -15,6 +15,4 @@ public class UserRegisterCommandDto {
   private String phone;
   private String pesel;
   private LocalDate birthday;
-  private LocalDateTime created;
-  private LocalDateTime updated;
 }

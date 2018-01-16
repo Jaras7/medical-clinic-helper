@@ -21,8 +21,7 @@ class UserRegistrationController {
 
   @RequestMapping(method = RequestMethod.POST)
   ResponseEntity<?> performRegistrationProcess(@RequestBody UserRegisterCommandDto userRegisterCommandDto) {
-    userFacade.performUserRegistrationProcess(userRegisterCommandDto);
-    return null;
+    return userFacade.performUserRegistrationProcess(userRegisterCommandDto);
   }
 
 

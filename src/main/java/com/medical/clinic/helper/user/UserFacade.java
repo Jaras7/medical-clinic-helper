@@ -5,6 +5,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -33,19 +35,18 @@ public class UserFacade {
     return userRepository.findAll(pageable);
   }
 
-  public boolean validateIfUserExistsByUsername(User user) {
-    User userToValidate = userRepository.findUserByLogin(user.getLogin());
-    return Optional.ofNullable(userToValidate).
-        map(result -> userToValidate.getPassword().equals(user.getPassword()))
-        .orElse(false);
+  public boolean checkIfUserExistsByLogin(String login) {
+    User userToValidate = userRepository.findUserByLogin(login);
+    return userToValidate != null;
   }
 
-  public boolean performUserRegistrationProcess(UserRegisterCommandDto userRegisterCommandDto){
-    User userToValidate = userRepository.findUserByLogin(userRegisterCommandDto.getLogin());
-    Optional<User> userToCreate  = Stream.of(userRegisterCommandDto)
-        .map(map->modelMapper.map(userRegisterCommandDto,User.class))
-        .findFirst();
-  userRepository.save(userToCreate.get());
-  return true;
+  public ResponseEntity<?> performUserRegistrationProcess(UserRegisterCommandDto userRegisterCommandDto) {
+    if (!checkIfUserExistsByLogin(userRegisterCommandDto.getLogin())) {
+      User userToCreate = modelMapper.map(userRegisterCommandDto, User.class);
+      userRepository.save(userToCreate);
+      return new ResponseEntity<>(userRegisterCommandDto, HttpStatus.CREATED);
+    }
+    return new ResponseEntity<>(new UserErrorType("Login already used"), HttpStatus.CONFLICT);
   }
+
 }
